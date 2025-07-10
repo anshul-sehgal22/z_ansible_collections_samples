@@ -13,20 +13,17 @@
 
 - name: Verify openshift minor version
   ansible.builtin.shell: |
-    # version=$(wget -q -O - https://mirror.openshift.com/pub/openshift-v4/{{ ansible_architecture }}/dependencies/rhcos/{{ openshift_version }}/{{ openshift_version }}.{{ openshift_minor_version }}/sha256sum.txt | grep rhcos | wc -l)
-    # if [ $version -eq "0" ] || [ "{{ openshift_minor_version }}" -eq "latest" ]; then
-    #   #echo $(wget -q -O - https://mirror.openshift.com/pub/openshift-v4/{{ ansible_architecture }}/dependencies/rhcos/{{ openshift_version }}/latest/sha256sum.txt | grep -Eo "[0-9]+\.[0-9]+\.[0-9]+" | head -n1)
-    #   echo $(wget -q -O - https://mirror.openshift.com/pub/openshift-v4/{{ ansible_architecture }}/dependencies/rhcos/pre-release/{{ openshift_version }}/latest/sha256sum.txt | grep -Eo "[0-9]+\.[0-9]+\.[0-9]+" | head -n1)
-    # else
-    #   echo "{{ openshift_version }}.{{ openshift_minor_version }}"
-    # fi
-    echo "{{ openshift_version }}.0-ec.3"
+    version=$(wget -q -O - https://mirror.openshift.com/pub/openshift-v4/{{ ansible_architecture }}/dependencies/rhcos/{{ openshift_version }}/{{ openshift_version }}.{{ openshift_minor_version }}/sha256sum.txt | grep rhcos | wc -l)
+    if [ $version -eq "0" ] || [ "{{ openshift_minor_version }}" -eq "latest" ]; then
+      echo $(wget -q -O - https://mirror.openshift.com/pub/openshift-v4/{{ ansible_architecture }}/dependencies/rhcos/{{ openshift_version }}/latest/sha256sum.txt | grep -Eo "[0-9]+\.[0-9]+\.[0-9]+" | head -n1)
+    else
+      echo "{{ openshift_version }}.{{ openshift_minor_version }}"
+    fi    
   register: icic_ocp_version
 
 - name: 'Set fact for openshift rhcos url'
   ansible.builtin.set_fact:
-    #openshift_rhcos_url: "https://mirror.openshift.com/pub/openshift-v4/{{ ansible_architecture }}/dependencies/rhcos/{{ openshift_version }}/{{ icic_ocp_version.stdout }}"
-    openshift_rhcos_url: "https://mirror.openshift.com/pub/openshift-v4/{{ ansible_architecture }}/dependencies/rhcos/pre-release/{{ icic_ocp_version.stdout }}"
+    openshift_rhcos_url: "https://mirror.openshift.com/pub/openshift-v4/{{ ansible_architecture }}/dependencies/rhcos/{{ openshift_version }}/{{ icic_ocp_version.stdout }}"
     openshift_install_dir: "."
 
 - name: Download checksum for the rhcos image
@@ -149,6 +146,7 @@
 
 - name: Upload RHCOS image to ICIC glance
   ansible.builtin.command:
+    #hypervisor_type=ZVM not supported by v1.2.4
     #cmd: openstack image create --disk-format=raw  --property gz_sha256={{ openshift_rhcos_sha256_results.stdout }} --property architecture=s390x --property os_name=Linux --property os_version=RHCOS{{ openshift_version }} --property os_distro=RHCOS{{ openshift_version }} --property hypervisor_type=ZVM --property disk_type=DASD --file=rhcos-{{ icic_ocp_version.stdout }}-s390x icic_rhcos_{{ vm_type }}_{{ disk_type }}_{{ openshift_version }}_{{ openshift_minor_version }}
     cmd: openstack image create --disk-format=raw  --property gz_sha256={{ openshift_rhcos_sha256_results.stdout }} --property architecture=s390x --property os_name=Linux --property os_version=RHCOS{{ openshift_version }} --property os_distro=RHCOS{{ openshift_version }} --property disk_type=DASD --file=rhcos-{{ icic_ocp_version.stdout }}-s390x icic_rhcos_{{ vm_type }}_{{ disk_type }}_{{ openshift_version }}_{{ openshift_minor_version }}
   when:
