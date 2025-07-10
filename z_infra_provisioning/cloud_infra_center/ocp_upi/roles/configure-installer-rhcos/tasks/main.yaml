@@ -18,7 +18,7 @@
       echo $(wget -q -O - https://mirror.openshift.com/pub/openshift-v4/{{ ansible_architecture }}/dependencies/rhcos/{{ openshift_version }}/latest/sha256sum.txt | grep -Eo "[0-9]+\.[0-9]+\.[0-9]+" | head -n1)
     else
       echo "{{ openshift_version }}.{{ openshift_minor_version }}"
-    fi    
+    fi
   register: icic_ocp_version
 
 - name: 'Set fact for openshift rhcos url'
