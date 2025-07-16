@@ -17,7 +17,8 @@
         echo $(./oc get nodes -o custom-columns=NAME:.metadata.name)
       register: result
       until: result.stdout.find("{{ workerid }}") != -1
-      retries: 30
+      #retries: 30
+      retries: 60
       delay: 10
   rescue:
     - name: Approve CSR failed
