@@ -20,10 +20,20 @@
     fi
   register: icic_ocp_version
 
+# TODO: 4.20 Testing
+- name: Display registered value of icic_ocp_version
+  debug:
+    var: icic_ocp_version
+    
 - name: 'Set fact for openshift client'
   ansible.builtin.set_fact:
     openshift_client_url: "https://mirror.openshift.com/pub/openshift-v4/{{ ansible_architecture }}/clients/ocp/{{ icic_ocp_version.stdout }}"
     openshift_install_dir: "."
+
+# TODO: 4.20 Testing
+- name: Display custom fact - openshift_client_url
+  debug:
+    var: openshift_client_url
 
 - name: Get checksum for local openshift-install-linux.tar.gz
   ansible.builtin.stat:
