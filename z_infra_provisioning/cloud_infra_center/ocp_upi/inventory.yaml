@@ -34,8 +34,8 @@ all:
       ansible_connection: local
       ansible_python_interpreter: "{{ansible_playbook_python}}"
 
-      use_network_name: '<network-name-from-icic>'
-      use_network_subnet: '<subnet-id-from-network-name-in-icic>'
+      use_network_name: '<network-name-from-iim>'
+      use_network_subnet: '<subnet-id-from-network-name-in-iim>'
 
       vm_type: 'kvm'
       disk_type: 'dasd'
