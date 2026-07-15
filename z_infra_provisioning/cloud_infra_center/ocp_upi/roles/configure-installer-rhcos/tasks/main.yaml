@@ -149,24 +149,25 @@
     #hypervisor_type=ZVM not supported by v1.2.4
     #Not providing any hypervisor_type in IIM_1.1.0 is failing.
     #cmd: openstack image create --disk-format=raw  --property gz_sha256={{ openshift_rhcos_sha256_results.stdout }} --property architecture=s390x --property os_name=Linux --property os_version=RHCOS{{ openshift_version }} --property os_distro=RHCOS{{ openshift_version }} --property hypervisor_type=ZVM --property disk_type=DASD --file=rhcos-{{ icic_ocp_version.stdout }}-s390x icic_rhcos_{{ vm_type }}_{{ disk_type }}_{{ openshift_version }}_{{ openshift_minor_version }}
+    cmd: openstack image create --disk-format=raw  --property gz_sha256={{ openshift_rhcos_sha256_results.stdout }} --property architecture=s390x --property os_name=Linux --property os_version=RHCOS{{ openshift_version }} --property os_distro=RHCOS{{ openshift_version }} --property hypervisor_type=ZVM --file=rhcos-{{ icic_ocp_version.stdout }}-s390x icic_rhcos_{{ vm_type }}_{{ disk_type }}_{{ openshift_version }}_{{ openshift_minor_version }}
     # disk_type is intentionally omitted during upload to avoid a UnicodeDecodeError in the
     # IBM Glance patch (image_data.py) that calls data.peek()[:100].decode("utf-8") on the
     # binary RHCOS image when both hypervisor_type=zvm and disk_type=DASD are present at
     # upload time.  disk_type=DASD is applied via a metadata-only 'image set' after upload.
-    cmd: openstack image create --disk-format=raw  --property gz_sha256={{ openshift_rhcos_sha256_results.stdout }} --property architecture=s390x --property os_name=Linux --property os_version=RHCOS{{ openshift_version }} --property os_distro=RHCOS{{ openshift_version }} --property hypervisor_type=zvm --file=rhcos-{{ icic_ocp_version.stdout }}-s390x icic_rhcos_{{ vm_type }}_{{ disk_type }}_{{ openshift_version }}_{{ openshift_minor_version }}
+    # cmd: openstack image create --disk-format=raw  --property gz_sha256={{ openshift_rhcos_sha256_results.stdout }} --property architecture=s390x --property os_name=Linux --property os_version=RHCOS{{ openshift_version }} --property os_distro=RHCOS{{ openshift_version }} --property hypervisor_type=zvm --file=rhcos-{{ icic_ocp_version.stdout }}-s390x icic_rhcos_{{ vm_type }}_{{ disk_type }}_{{ openshift_version }}_{{ openshift_minor_version }}
   when:
     - vm_type == "zvm"
     - disk_type == "dasd"
     - icic_rhcos_count.stdout | int != 1
 
-- name: Set disk_type property on uploaded DASD RHCOS image
-  ansible.builtin.shell: |
-    image_id=$(openstack image list --format value | grep -w 'icic_rhcos_{{ vm_type }}_{{ disk_type }}_{{ openshift_version }}_{{ openshift_minor_version }}' | awk '{print $1}')
-    openstack image set --property disk_type=DASD $image_id
-  when:
-    - vm_type == "zvm"
-    - disk_type == "dasd"
-    - icic_rhcos_count.stdout | int != 1
+# - name: Set disk_type property on uploaded DASD RHCOS image
+#   ansible.builtin.shell: |
+#     image_id=$(openstack image list --format value | grep -w 'icic_rhcos_{{ vm_type }}_{{ disk_type }}_{{ openshift_version }}_{{ openshift_minor_version }}' | awk '{print $1}')
+#     openstack image set --property disk_type=DASD $image_id
+#   when:
+#     - vm_type == "zvm"
+#     - disk_type == "dasd"
+#     - icic_rhcos_count.stdout | int != 1
 
 - name: Upload RHCOS image to ICIC glance
   ansible.builtin.command:
